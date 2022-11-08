@@ -1,9 +1,11 @@
-﻿using SimpleInjector;
+﻿using Microsoft.AspNetCore.Components;
+using SimpleInjector;
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using Venn.Data;
 using Venn.Data.Repos;
 using Venn.Models.Models.Concretes;
@@ -26,6 +28,8 @@ namespace Venn.Server
 
         static ObservableCollection<Room> rooms;
 
+        private static Dispatcher dispatcher = Dispatcher.CreateDefault();
+
         static void Main(string[] args)
         {
             container = new Container();
@@ -37,24 +41,51 @@ namespace Venn.Server
             users = new ObservableCollection<User>(userRepo.GetAll());
             rooms = new ObservableCollection<Room>(roomRepo.GetAll());
             clients = new List<Client>();
-            listener = new TcpListener(IPAddress.Parse("192.168.100.56"), 53685);
+            listener = new TcpListener(IPAddress.Parse("192.168.100.56"), 51753);
             listener.Start();
             Console.WriteLine($"[{DateTime.Now}]: Listener has started");
 
             while (true)
             {
-                var client = new Client(listener.AcceptTcpClient());
-                Console.WriteLine($"[{DateTime.Now}]: Client has connected");
-                clients.Add(client);
+                var newClient = new Client(listener.AcceptTcpClient());
+                var ip = newClient.TcpClient.Client.RemoteEndPoint.ToString().Split(':')[0];
+                Console.WriteLine($"[{ip}]: Client has connected");
+                clients.Add(newClient);
                 Task.Run(() =>
                 {
+                    var client = newClient;
                     while (client.TcpClient.Connected)
                     {
-                        var ns = client.TcpClient.GetStream();
-                        var bytes = new byte[4096];
-                        var length = ns.Read(bytes, 0, bytes.Length);
-                        var str = Encoding.Default.GetString(bytes, 0, length);
-                        var command  = str.Split('$')[0];
+                        string str;
+                        try
+                        {
+                            var ns = client.TcpClient.GetStream();
+                            var bytes = new byte[4096];
+                            var length = ns.Read(bytes, 0, bytes.Length);
+                            str = Encoding.Default.GetString(bytes, 0, length);
+                        }
+                        catch (Exception)
+                        {
+                            Console.WriteLine($"[{ip}]: Client has disconnected");
+                            foreach (var cl in clients)
+                            {
+                                if (cl.User != null)
+                                {
+                                    var contacts = new ObservableCollection<User>();
+                                    foreach (var c in clients)
+                                    {
+                                        if (c.User != null && c.User.Id != client.User.Id)
+                                        {
+                                            contacts.Add(c.User);
+                                        }
+                                    }
+                                    cl.TcpClient.Client.Send(Encoding.UTF8.GetBytes($"contacts${JsonSerializer.Serialize(contacts)}"));
+                                }
+                            }
+                            break;
+                        }
+
+                        var command = str.Split('$')[0];
                         if (command == "login")
                         {
                             var email = str.Split('$')[1];
@@ -67,20 +98,35 @@ namespace Venn.Server
                                     var r = $"success${JsonSerializer.Serialize(user)}";
                                     client.TcpClient.Client.Send(Encoding.UTF8.GetBytes(r));
                                     client.User = user;
-                                    Console.WriteLine($"[{DateTime.Now}]: Client has logined");
+                                    Console.WriteLine($"[{ip}]: Client has logined");
+                                    foreach (var cl in clients)
+                                    {
+                                        if (cl.User != null)
+                                        {
+                                            var contacts = new ObservableCollection<User>();
+                                            foreach (var c in clients)
+                                            {
+                                                if (c.User != null && c.User.Id != client.User.Id)
+                                                {
+                                                    contacts.Add(c.User); 
+                                                }
+                                            }
+                                            cl.TcpClient.Client.Send(Encoding.UTF8.GetBytes($"contacts${JsonSerializer.Serialize(contacts)}"));
+                                        }
+                                    }
                                 }
                                 else
                                 {
                                     var r = "password$Sorry, your password was incorrect.";
                                     client.TcpClient.Client.Send(Encoding.UTF8.GetBytes(r));
-                                    Console.WriteLine($"[{DateTime.Now}]: Client login failed");
+                                    Console.WriteLine($"[{ip}]: Client login failed");
                                 }
                             }
                             else
                             {
                                 var r = "email$The email you entered isn’t connected to an account";
                                 client.TcpClient.Client.Send(Encoding.UTF8.GetBytes(r));
-                                Console.WriteLine($"[{DateTime.Now}]: Client login failed");
+                                Console.WriteLine($"[{ip}]: Client login failed");
                             }
                         }
                         else if (command == "create")
@@ -104,12 +150,12 @@ namespace Venn.Server
                                     users = new ObservableCollection<User>(userRepo.GetAll());
                                 }
                                 client.TcpClient.Client.Send(Encoding.UTF8.GetBytes("true"));
-                                Console.WriteLine($"[{DateTime.Now}]: Client has created user");
-                            }  
+                                Console.WriteLine($"[{ip}]: Client has created user");
+                            }
                             else
                             {
                                 client.TcpClient.Client.Send(Encoding.UTF8.GetBytes("false"));
-                                Console.WriteLine($"[{DateTime.Now}]: Client create user failed");
+                                Console.WriteLine($"[{ip}]: Client create user failed");
                             }
                         }
                     }

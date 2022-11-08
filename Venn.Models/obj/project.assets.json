@@ -2317,11 +2317,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\babas\\Documents\\Step It Academy\\Network Programming\\Venn\\Venn.Models\\Venn.Models.csproj",
+      "projectUniqueName": "C:\\Users\\babas\\Source\\Repos\\babasoy84\\Venn\\Venn.Models\\Venn.Models.csproj",
       "projectName": "Venn.Models",
-      "projectPath": "C:\\Users\\babas\\Documents\\Step It Academy\\Network Programming\\Venn\\Venn.Models\\Venn.Models.csproj",
+      "projectPath": "C:\\Users\\babas\\Source\\Repos\\babasoy84\\Venn\\Venn.Models\\Venn.Models.csproj",
       "packagesPath": "C:\\Users\\babas\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\babas\\Documents\\Step It Academy\\Network Programming\\Venn\\Venn.Models\\obj\\",
+      "outputPath": "C:\\Users\\babas\\Source\\Repos\\babasoy84\\Venn\\Venn.Models\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\babas\\AppData\\Roaming\\NuGet\\NuGet.Config",

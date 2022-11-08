@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "75AJiwOM+9dok25xPpKwwrUbLjgUVmludDZL17h1rg6cykOieXlLeVpX79ZmvnHAXnrMRYGowQno87l0+puOOw==",
+  "dgSpecHash": "JIPFCi/j+aYBNS807PYfGjO/4y1CoJzMkA3Cnpq//pgngTcW/W0qNUIgm5omLjMUWg/UwxAQaB4W+6HsvigTzg==",
   "success": true,
-  "projectFilePath": "C:\\Users\\babas\\Documents\\Step It Academy\\Network Programming\\Venn\\Venn.Models\\Venn.Models.csproj",
+  "projectFilePath": "C:\\Users\\babas\\Source\\Repos\\babasoy84\\Venn\\Venn.Models\\Venn.Models.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\babas\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\babas\\.nuget\\packages\\materialdesigncolors\\2.0.6\\materialdesigncolors.2.0.6.nupkg.sha512",
